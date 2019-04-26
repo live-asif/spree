@@ -11,12 +11,8 @@ To implement preferences for a model, simply add a new column called `preference
 
 ```ruby
 class AddPreferencesColumnToSpreeProducts < ActiveRecord::Migration[4.2]
-  def up
+  def change
     add_column :spree_products, :preferences, :text
-  end
-
-  def down
-    remove_column :spree_products, :preferences
   end
 end
 ```
@@ -290,7 +286,7 @@ In the above configuration file, three preferences have been defined:
 It is recommended to create the configuration file in the `lib/` directory.
 
 ***
-Extensions can also define site-wide preferences. For more information on using preferences like this with extensions, check out the [Extensions Tutorial](extensions_tutorial).
+Extensions can also define site-wide preferences. For more information on using preferences like this with extensions, check out the [Extensions Tutorial](/developer/tutorials/extensions_tutorial.html).
 ***
 
 ### Configuring Site-Wide Preferences

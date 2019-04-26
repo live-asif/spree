@@ -4,23 +4,25 @@ import PropTypes from 'prop-types'
 import { cx } from 'emotion'
 
 // --- Components
-import Button from 'components/base/Button'
-
-// --- Icons
-import { ArrowRight } from 'react-feather'
+import { Link } from 'gatsby'
 
 /**
  * Component
  */
 
 const Section = ({ title, path, children, className }) => (
-  <div className={cx('pa4 ba b--light-gray br2 w-50', className)}>
-    <h2 className="f3 mt0 spree-blue">{title}</h2>
-    <p className="lh-copy pl4">{children}</p>
-    <div className="tr mt4">
-      <Button to={path}>
-        <ArrowRight className="mr1" height={16} /> Read More...
-      </Button>
+  <div className={cx('pa0 pa2-ns flex w-100 w-50-ns mb4 mb0-ns', className)}>
+    <div className="ba b--light-gray br2 pa3 w-100">
+      <h2 className="f3 mt0 spree-blue">
+        {path ? (
+          <Link to={path} className="link spree-blue">
+            {title}
+          </Link>
+        ) : (
+          title
+        )}
+      </h2>
+      <p className="lh-copy">{children}</p>
     </div>
   </div>
 )

@@ -1,4 +1,4 @@
-require 'spree/order/checkout'
+require_dependency 'spree/order/checkout'
 
 module Spree
   class Order < Spree::Base
@@ -21,30 +21,6 @@ module Spree
 
     alias display_ship_total display_shipment_total
     alias_attribute :ship_total, :shipment_total
-
-    def guest_token
-      ActiveSupport::Deprecation.warn(<<-DEPRECATION, caller)
-        Order#guest_token is deprecated and will be removed in Spree 4.0. Please use Order#token instead
-      DEPRECATION
-
-      token
-    end
-
-    def guest_token?
-      ActiveSupport::Deprecation.warn(<<-DEPRECATION, caller)
-        Order#guest_token? is deprecated and will be removed in Spree 4.0. Please use Order#token? instead
-      DEPRECATION
-
-      token?
-    end
-
-    def guest_token=(value)
-      ActiveSupport::Deprecation.warn(<<-DEPRECATION, caller)
-        Order#guest_token= is deprecated and will be removed in Spree 4.0. Please use Order#token= instead
-      DEPRECATION
-
-      self.token = value
-    end
 
     MONEY_THRESHOLD  = 100_000_000
     MONEY_VALIDATION = {
@@ -103,15 +79,15 @@ module Spree
     belongs_to :store, class_name: 'Spree::Store'
 
     with_options dependent: :destroy do
-      has_many :state_changes, as: :stateful
-      has_many :line_items, -> { order(:created_at) }, inverse_of: :order
-      has_many :payments
-      has_many :return_authorizations, inverse_of: :order
-      has_many :adjustments, -> { order(:created_at) }, as: :adjustable
+      has_many :state_changes, as: :stateful, class_name: 'Spree::StateChange'
+      has_many :line_items, -> { order(:created_at) }, inverse_of: :order, class_name: 'Spree::LineItem'
+      has_many :payments, class_name: 'Spree::Payment'
+      has_many :return_authorizations, inverse_of: :order, class_name: 'Spree::ReturnAuthorization'
+      has_many :adjustments, -> { order(:created_at) }, as: :adjustable, class_name: 'Spree::Adjustment'
     end
-    has_many :reimbursements, inverse_of: :order
+    has_many :reimbursements, inverse_of: :order, class_name: 'Spree::Reimbursement'
     has_many :line_item_adjustments, through: :line_items, source: :adjustments
-    has_many :inventory_units, inverse_of: :order
+    has_many :inventory_units, inverse_of: :order, class_name: 'Spree::InventoryUnit'
     has_many :variants, through: :line_items
     has_many :products, through: :variants
     has_many :refunds, through: :payments
@@ -124,7 +100,7 @@ module Spree
     has_many :order_promotions, class_name: 'Spree::OrderPromotion'
     has_many :promotions, through: :order_promotions, class_name: 'Spree::Promotion'
 
-    has_many :shipments, dependent: :destroy, inverse_of: :order do
+    has_many :shipments, class_name: 'Spree::Shipment', dependent: :destroy, inverse_of: :order do
       def states
         pluck(:state).uniq
       end
@@ -184,17 +160,6 @@ module Spree
     # that should be called after Order#update
     def self.register_update_hook(hook)
       update_hooks.add(hook)
-    end
-
-    # Use this method in other gems that wish to register their own custom logic
-    # that should be called when determining if two line items are equal.
-    def self.register_line_item_comparison_hook(hook)
-      ActiveSupport::Deprecation.warn(<<-EOS, caller)
-        Order.register_line_item_comparison_hook is deprecated and will be removed in Spree 4.0. Please use
-        `Rails.application.config.spree.line_item_comparison_hooks << hook` instead.
-      EOS
-
-      Rails.application.config.spree.line_item_comparison_hooks << hook
     end
 
     # For compatiblity with Calculator::PriceSack
@@ -288,10 +253,6 @@ module Spree
       inventory_units.all?(&:returned?)
     end
 
-    def contents
-      @contents ||= Spree::OrderContents.new(self)
-    end
-
     # Associates the specified user with the order.
     def associate_user!(user, override_email = true)
       self.user           = user
@@ -315,27 +276,8 @@ module Spree
     def find_line_item_by_variant(variant, options = {})
       line_items.detect do |line_item|
         line_item.variant_id == variant.id &&
-          line_item_options_match(line_item, options)
+          Spree::Dependencies.cart_compare_line_items_service.constantize.new.call(order: self, line_item: line_item, options: options).value
       end
-    end
-
-    # This method enables extensions to participate in the
-    # "Are these line items equal" decision.
-    #
-    # When adding to cart, an extension would send something like:
-    # params[:product_customizations]={...}
-    #
-    # and would provide:
-    #
-    # def product_customizations_match
-    def line_item_options_match(line_item, options)
-      ActiveSupport::Deprecation.warn(<<-EOS, caller)
-        Order#add is deprecated and will be removed in Spree 4.0. Please use
-        Spree::CompareLineItems service instead.
-      EOS
-      return true unless options
-
-      Spree::Dependencies.cart_compare_line_items_service.constantize.new.call(order: self, line_item: line_item, options: options).value
     end
 
     # Creates new tax charges if there are any applicable rates. If prices already
@@ -540,6 +482,7 @@ module Spree
     def apply_free_shipping_promotions
       Spree::PromotionHandler::FreeShipping.new(self).activate
       shipments.each { |shipment| Spree::Adjustable::AdjustmentsUpdater.update(shipment) }
+      create_shipment_tax_charge!
       update_with_updater!
     end
 
@@ -726,14 +669,6 @@ module Spree
 
     def ensure_currency_presence
       self.currency ||= store.default_currency || Spree::Config[:currency]
-    end
-
-    def set_currency
-      ActiveSupport::Deprecation.warn(<<-DEPRECATION, caller)
-         Spree::Order#set_currency was renamed to Spree::Order#ensure_currency_presence
-         and will be removed in Spree 4.0. Please update your code to avoid problems after update
-      DEPRECATION
-      ensure_currency_presence
     end
 
     def create_token

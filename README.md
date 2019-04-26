@@ -2,6 +2,7 @@
 <a href="https://spreecommerce.org" target="_blank" rel="follow"><img src="spree_logo.png" width="261" alt="Spree Commerce"></a>
 
 * Join our Slack at [slack.spreecommerce.org](http://slack.spreecommerce.org/)
+* [Start a new project or get tech support](https://spreecommerce.org/contact/)
 * [Success Stories](https://spreecommerce.org/stories/)
 * [Integrations](https://spreecommerce.org/integrations/)
 * [Extensions](https://github.com/spree/spree#extensions)
@@ -21,7 +22,7 @@ Spree consists of several different gems, each of which are maintained
 in a single repository and documented in a single set of
 [online documentation](http://guides.spreecommerce.org/).
 
-* **spree_api** (new REST API v2 and legacy REST API v1, [GraphQL support](https://github.com/spree/spree/issues/9176) coming soon)
+* **spree_api** (new [REST API v2](https://guides.spreecommerce.org/api/v2) and legacy [REST API v1](https://guides.spreecommerce.org/api/), [GraphQL support](https://github.com/spree/spree/issues/9176) coming soon) - we also have an official [API v2 JavaScript / TypeScript SDK](https://github.com/spree/spree-storefront-api-v2-js-sdk)
 * **spree_frontend** (default Rails customer frontend)
 * **spree_backend** (Admin Panel)
 * **spree_cmd** (Command-line tools)

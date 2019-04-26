@@ -12,7 +12,15 @@ info:
       intefaces either in JavaScript frameworks or native mobile libraries.
     </p>
     <p>
-      Please read our introduction to the API v2 [insert link here]
+      Please read our <a href="https://guides.spreecommerce.org/api/v2/">
+        introduction to the API v2
+      </a>
+    </p>
+    <p>
+      Download our
+      <a href="https://github.com/spree/spree-storefront-api-v2-js-sdk">
+        official JavaScript & TypeScript SDK
+      </a>
     </p>
     <p>
       <a href="https://raw.githubusercontent.com/spree/spree/master/api/docs/v2/storefront/index.yaml" target="_blank" rel="noopener">
@@ -343,7 +351,7 @@ paths:
       operationId: 'Apply Coupon Code'
       responses:
         '200':
-          description: Cuopon code was applied successfully
+          description: Coupon code was applied successfully
           content:
             application/vnd.api+json:
               schema:
@@ -404,6 +412,35 @@ paths:
         - orderToken: []
         - bearerAuth: []
 
+  '/cart/estimate_shipping_rates':
+    get:
+      description:  Returns a list of Estimated Shipping Rates for Cart
+      tags:
+        - Cart
+      operationId: 'Estimate Shipping Rates'
+      parameters:
+        - name: country_iso
+          in: query
+          description: >-
+            Country ISO or ISO3 symbol to get estimations for this destination,
+            by default we'll try to reuse Cart shipping address or the default Country for the current Store
+          schema:
+            type: string
+          example: 'USA'
+        - $ref: '#/components/parameters/SparseFieldsParam'
+      responses:
+        '200':
+          description: Returns a list of estimated Shipping Rates for Cart
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/EstimateShippingRatesList'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+      security:
+        - orderToken: []
+        - bearerAuth: []
+
   '/checkout':
     patch:
       description: >-
@@ -419,28 +456,24 @@ paths:
           order: {
             email: 'john@snow.org',
             bill_address_attributes: {
-              {
-                firstname: 'John',
-                lastname: 'Snow',
-                address1: '7735 Old Georgetown Road',
-                city: 'Bethesda',
-                phone: '3014445002',
-                zipcode: '20814',
-                state_name: 'MD',
-                country_iso: 'US'
-              }
+              firstname: 'John',
+              lastname: 'Snow',
+              address1: '7735 Old Georgetown Road',
+              city: 'Bethesda',
+              phone: '3014445002',
+              zipcode: '20814',
+              state_name: 'MD',
+              country_iso: 'US'
             },
             ship_address_attributes: {
-              {
-                firstname: 'John',
-                lastname: 'Snow',
-                address1: '7735 Old Georgetown Road',
-                city: 'Bethesda',
-                phone: '3014445002',
-                zipcode: '20814',
-                state_name: 'MD',
-                country_iso: 'US'
-              }
+              firstname: 'John',
+              lastname: 'Snow',
+              address1: '7735 Old Georgetown Road',
+              city: 'Bethesda',
+              phone: '3014445002',
+              zipcode: '20814',
+              state_name: 'MD',
+              country_iso: 'US'
             }
           }
         </pre>
@@ -462,9 +495,12 @@ paths:
         <br />
         <pre>
           order: {
-            shipments_attributes: {
-              '0' => { selected_shipping_rate_id: 1, id: 1}
-            }
+            shipments_attributes: [
+              {
+                id: 1,
+                selected_shipping_rate_id: 1
+              }
+            ]
           }
         </pre>
         <br />
@@ -486,7 +522,7 @@ paths:
               ]
             },
             payment_source: {
-              '1' => {
+              1: {
                 number: '4111111111111111',
                 month: '01',
                 year: '2022',
@@ -761,6 +797,7 @@ paths:
       operationId: 'Products List'
       parameters:
         - $ref: '#/components/parameters/FilterByIds'
+        - $ref: '#/components/parameters/FilterBySKUs'
         - in: query
           name: filter[price]
           schema:
@@ -787,6 +824,18 @@ paths:
           description: >-
             Find Prodcuts with Variants that have the specified option (eg. color, size)
             and value (eg. red, XS)
+        - in: query
+          name: 'filter[show_deleted]'
+          schema:
+            type: boolean
+          example: true
+          description: Returns also deleted products
+        - in: query
+          name: 'filter[show_discontinued]'
+          schema:
+            type: boolean
+          example: true
+          description: Returns also discontinued products
         - in: query
           name: sort
           schema:
@@ -2220,6 +2269,14 @@ components:
           items:
             oneOf:
               - $ref: '#/components/schemas/ShippingRate'
+    EstimateShippingRatesList:
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShippingRate'
     ShippingRate:
       properties:
         id:
@@ -2517,6 +2574,13 @@ components:
         type: string
       example: 1,2,3
       description: Fetch only resources with corresponding IDs
+    FilterBySKUs:
+      in: query
+      name: filter[skus]
+      schema:
+        type: string
+      example: SKU-123,SKU-345
+      description: Fetch only resources with corresponding SKUs
     FilterByName:
       in: query
       name: filter[name]

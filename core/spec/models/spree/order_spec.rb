@@ -533,6 +533,8 @@ describe Spree::Order, type: :model do
 
       expect(Spree::Adjustable::AdjustmentsUpdater).to receive(:update).with(shipment)
 
+      expect(Spree::TaxRate).to receive(:adjust).with(order, [shipment])
+
       expect(order.updater).to receive(:update)
       order.apply_free_shipping_promotions
     end
@@ -571,12 +573,13 @@ describe Spree::Order, type: :model do
 
       it 'matches line item when options match' do
         allow(order).to receive(:foos_match).and_return(true)
-        expect(order.line_item_options_match(@line_items.first, foos: { bar: :zoo })).to be true
+        expect(Spree::Dependencies.cart_compare_line_items_service.constantize.new.call(order: order, line_item: @line_items.first, options: { foos: { bar: :zoo } }).value).to be true
+
       end
 
       it 'does not match line item without options' do
         allow(order).to receive(:foos_match).and_return(false)
-        expect(order.line_item_options_match(@line_items.first, {})).to be false
+        expect(Spree::Dependencies.cart_compare_line_items_service.constantize.new.call(order: order, line_item: @line_items.first, options: {}).value).to be false
       end
     end
   end

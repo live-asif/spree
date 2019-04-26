@@ -11,12 +11,12 @@ The Spree test code is an evolving story. We started out with RSpec, then switch
 
 ## Testing Spree Components
 
-Spree consists of several different gems (see the [Source Code Guide](navigating#layout-and-structure) for more details.) Each of these gems has its own test suite which can be found in the `spec` directory. Since these gems are also Rails engines, they can't really be tested in complete isolation - they need to be tested within the context of a Rails application.
+Spree consists of several different gems (see the [Source Code Guide](/developer/source/navigating.html#layout-and-structure) for more details.) Each of these gems has its own test suite which can be found in the `spec` directory. Since these gems are also Rails engines, they can't really be tested in complete isolation - they need to be tested within the context of a Rails application.
 
 You can easily build such an application by using the Rake task designed for this purpose, running it inside the component you want to test:
 
 ```bash
-$ bundle exec rake test_app
+bundle exec rake test_app
 ```
 
 This will build the appropriate test application inside of your `spec` directory. It will also add the gem under test to your `Gemfile` along with the `spree_core` gem (since all of the gems depend on this.)
@@ -28,7 +28,7 @@ This rake task will regenerate the application (after deleting the existing one)
 Once your test application has been built, you can then run the specs in the standard RSpec manner:
 
 ```bash
-$ bundle exec rspec spec
+bundle exec rspec spec
 ```
 
 We also set up a build script that mimics what our build server performs. You can run it from the root of the Spree project like this:
@@ -40,22 +40,22 @@ $ bash build.sh
 If you wish to run spec for a single file then you can do so like this:
 
 ```bash
-$ bundle exec rspec spec/models/spree/state_spec.rb
+bundle exec rspec spec/models/spree/state_spec.rb
 ```
 
 If you wish to test a particular line number of the spec file then you can do so like this:
 
 ```bash
-$ bundle exec rspec spec/models/spree/state_spec.rb:7
+bundle exec rspec spec/models/spree/state_spec.rb:7
 ```
 
 ### Using Factories
 
-Spree uses [factory_bot](https://github.com/thoughtbot/factory_bot) to create valid records for testing purpose. All of the factories are also packaged in the gem. So if you are writing an extension or if you just want to play with Spree models then you can use these factories as illustrated below.
+Spree uses [factory_bot](https://github.com/thoughtbot/factory_bot) to create valid records for testing purpose. All of the factories are also packaged in the gem. So if you are writing an extension or if you just want to play with Spree models then you can use these factories as illustrated below or add it directly to `rails_helper`.
 
 ```bash
-$ rails console
-$ require 'spree/testing_support/factories'
+rails console
+require 'spree/testing_support/factories'
 ```
 
 The `spree_core` gem has a good number of factories which can be used for testing. If you are writing an extension or just testing Spree you can make use of these factories.

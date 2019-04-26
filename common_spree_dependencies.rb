@@ -17,23 +17,23 @@ platforms :ruby do
   gem 'pg', '~> 0.18'
 end
 
+group :development do
+  gem 'webdrivers', '~> 3.8.0'
+end
+
 group :test do
   gem 'capybara', '~> 2.16'
   gem 'capybara-screenshot', '~> 1.0'
   gem 'database_cleaner', '~> 1.3'
   gem 'email_spec'
-  gem 'factory_bot_rails', '~> 4.8'
+  gem 'factory_bot_rails', '~> 5.0'
   gem 'rspec-activemodel-mocks', '~> 1.0'
-  gem 'rspec-collection_matchers'
-  gem 'rspec-its'
-  gem 'rspec-rails', '~> 3.7.2'
+  gem 'rspec-rails', '~> 3.8.2'
   gem 'rspec-retry'
   gem 'rspec_junit_formatter'
   gem 'jsonapi-rspec'
   gem 'simplecov'
   gem 'webmock', '~> 3.0.1'
-  gem 'selenium-webdriver'
-  gem 'chromedriver-helper'
   gem 'timecop'
   gem 'rails-controller-testing'
 end
